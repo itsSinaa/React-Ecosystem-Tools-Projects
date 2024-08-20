@@ -10,5 +10,3 @@ This repository contains multiple projects that demonstrate the use of various t
   - [TodoList App (React Query)](#todolist-app-react-query)
   - [TodoList App (redux)](#todolist-app-react-query)
   - [Cart App (Context Api)](#todolist-app-react-query)
-  - [Coffee website (Next js)](#coffee-website-nextjs)
-  - [TodoList App (Next js)](#todolist-app-nextjs)
