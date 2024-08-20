@@ -56,7 +56,7 @@ const TodoList = () => {
     createTodos.mutate({
       checked: false,
       description: "test",
-      id: String(todos?.length + 1),
+      id: String(todos?.length as number + 1),
       title: title,
     });
 
