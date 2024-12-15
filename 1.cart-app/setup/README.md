@@ -1,30 +1,126 @@
-# React + TypeScript + Vite
+redux typescript boilerplate setup : 
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+store.ts```
 
-Currently, two official plugins are available:
+import { configureStore } from "@reduxjs/toolkit";
+import couter from "./starter/09-rtk/appSlice";
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+const AppStore = configureStore({
+  reducer: couter,
+});
 
-## Expanding the ESLint configuration
+export type RootState = ReturnType<typeof AppStore.getState>;
+export type AppDisptach = typeof AppStore.dispatch;
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+export default AppStore;
 
-- Configure the top-level `parserOptions` property like this:
+==================================================================================
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
+hooks.ts```
+
+import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+import { RootState, AppDisptach } from "./store";
+
+export const useAppDisptach: () => AppDisptach = useDispatch;
+export const useAppSelector: TypedUseSelectorHook<RootState> =
+  useSelector;
+
+==================================================================================
+
+slice.ts```
+
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+
+type InitialState = {
+  count: number;
+  status: AppStatus;
+};
+
+type AppStatus = "Pending" | "Active" | "Inactive";
+
+const initialState: InitialState = {
+  count: 0,
+  status: "Pending",
+};
+
+const appSlice = createSlice({
+  name: "couter",
+  initialState,
+  reducers: {
+    increment: (state) => {
+      state.count += 1;
+    },
+    decrement: (state) => {
+      state.count -= 1;
+    },
+    reset: (state) => {
+      state.count = 0;
+    },
+    changStatus: (state, action: PayloadAction<AppStatus>) => {
+      state.status = action.payload;
+    },
   },
-}
-```
+});
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+export default appSlice.reducer
+export const {changStatus,decrement,increment,reset} = appSlice.actions
+
+==================================================================================
+
+indevitual Components that you need useDisptach or useSelector
+for example index.tsx Component
+
+import { changStatus, decrement, increment, reset } from "./appSlice";
+import { useAppDisptach, useAppSelector } from "../../hooks";
+
+function Component() {
+  const { count, status } = useAppSelector((state) => state);
+  const disptach = useAppDisptach()
+
+  return (
+    <div>
+      <h2>Count: {count}</h2>
+      <h2>Status: {status}</h2>
+
+      <div className="btn-container">
+        <button onClick={() => disptach(increment())} className="btn">
+          Increment
+        </button>
+        <button onClick={() =>  disptach(decrement())}className="btn">
+          Decrement
+        </button>
+        <button onClick={() =>  disptach(reset())}className="btn">
+          Reset
+        </button>
+      </div>
+      <div className="btn-container">
+        <button onClick={() =>  disptach(changStatus("Active"))} className="btn">
+          Set Status to Active
+        </button>
+        <button className="btn" onClick={() => disptach(changStatus("Inactive"))}>
+          Set Status to Inactive
+        </button>
+      </div>
+    </div>
+  );
+}
+export default Component;
+
+==================================================================================
+
+main.tsx```
+
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App.tsx";
+import "./index.css";
+import AppStore from "./store.ts";
+
+import { Provider } from "react-redux";
+
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <Provider store={AppStore}>
+    <App />
+  </Provider>
+);
